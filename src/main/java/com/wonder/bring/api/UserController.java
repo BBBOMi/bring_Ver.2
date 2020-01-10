@@ -1,8 +1,8 @@
 package com.wonder.bring.api;
 
 import com.wonder.bring.dto.User;
-import com.wonder.bring.model.DefaultRes;
-import com.wonder.bring.model.SignUpReq;
+import com.wonder.bring.model.DefaultResponse;
+import com.wonder.bring.model.SignUpRequest;
 import com.wonder.bring.service.JwtService;
 import com.wonder.bring.service.UserService;
 import com.wonder.bring.utils.Message;
@@ -15,7 +15,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
 
-import static com.wonder.bring.model.DefaultRes.*;
+import static com.wonder.bring.model.DefaultResponse.*;
+import static com.wonder.bring.utils.auth.AuthAspect.AUTHORIZATION;
 
 /**
  * Created by bomi on 2018-12-28.
@@ -25,10 +26,9 @@ import static com.wonder.bring.model.DefaultRes.*;
 @RequestMapping("users")
 @RestController
 public class UserController {
+    private static final DefaultResponse NO_CONTENT_RESPONSE = new DefaultResponse(Status.BAD_REQUEST, Message.NO_CONTENT);
     private final UserService userService;
     private final JwtService jwtService;
-
-    private static final DefaultRes NO_CONTENT_RES = new DefaultRes(Status.BAD_REQUEST, Message.NO_CONTENT);
 
     // 생성자 의존성 주입
     public UserController(final UserService userService, final JwtService jwtService) {
@@ -44,31 +44,31 @@ public class UserController {
      */
     @Auth
     @GetMapping("")
-    public ResponseEntity getMyPage(@RequestHeader(value = "Authorization") final String header) {
+    public ResponseEntity getMyPage(@RequestHeader(AUTHORIZATION) final String header) {
         try {
             final int userIdx = jwtService.decode(header).getUser_idx();
-            DefaultRes<User> defaultRes = userService.getUser(userIdx);
-            defaultRes.getData().setAuth(true);
-            return new ResponseEntity(defaultRes, HttpStatus.OK);
+            DefaultResponse<User> defaultResponse = userService.getUser(userIdx);
+            defaultResponse.getData().setAuth(true);
+            return new ResponseEntity(defaultResponse, HttpStatus.OK);
         } catch(Exception e) {
             log.error(e.getMessage());
-            return new ResponseEntity(FAIL_DEFAULT_RES, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity(FAIL_DEFAULT_RESPONSE, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     /**
      * 회원 가입
-     * @param signUpReq
+     * @param signUpRequest
      *      가입할 객체
      * @return 결과 데이터
      */
     @PostMapping("")
-    public ResponseEntity signUp(SignUpReq signUpReq) {
+    public ResponseEntity signUp(SignUpRequest signUpRequest) {
         try {
-            return new ResponseEntity(userService.saveUser(signUpReq), HttpStatus.OK);
+            return new ResponseEntity(userService.saveUser(signUpRequest), HttpStatus.OK);
         } catch(Exception e) {
             log.error(e.getMessage());
-            return new ResponseEntity(FAIL_DEFAULT_RES, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity(FAIL_DEFAULT_RESPONSE, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -92,11 +92,11 @@ public class UserController {
                 return new ResponseEntity(userService.dupleCheckNick(Optional.of(nick.get())), HttpStatus.OK);
             } else {
                 // 값이 없을 경우
-                return new ResponseEntity(NO_CONTENT_RES, HttpStatus.OK);
+                return new ResponseEntity(NO_CONTENT_RESPONSE, HttpStatus.OK);
             }
         } catch(Exception e) {
             log.error(e.getMessage());
-            return new ResponseEntity(FAIL_DEFAULT_RES, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity(FAIL_DEFAULT_RESPONSE, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 

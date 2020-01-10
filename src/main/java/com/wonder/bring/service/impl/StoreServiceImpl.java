@@ -2,7 +2,7 @@ package com.wonder.bring.service.impl;
 
 import com.wonder.bring.dto.Store;
 import com.wonder.bring.mapper.StoreMapper;
-import com.wonder.bring.model.DefaultRes;
+import com.wonder.bring.model.DefaultResponse;
 import com.wonder.bring.service.StoreService;
 import com.wonder.bring.utils.Message;
 import com.wonder.bring.utils.Status;
@@ -27,13 +27,13 @@ public class StoreServiceImpl implements StoreService {
      * @return
      */
     @Override
-    public DefaultRes<Store> findByStoreIdx(int storeIdx) {
+    public DefaultResponse<Store> getStoreInfo(int storeIdx) {
         // 매장 상세 정보 조회
         final Store store = storeMapper.findDetailByStoreIdx(storeIdx);
 
         if(store == null) {
-            return DefaultRes.res(Status.NOT_FOUND, Message.NOT_FOUND_DETAIL_STORE);
+            return DefaultResponse.res(Status.NOT_FOUND, Message.NOT_FOUND_DETAIL_STORE);
         }
-        return DefaultRes.res(Status.OK, Message.READ_DETAIL_STORE, store);
+        return DefaultResponse.res(Status.OK, Message.READ_DETAIL_STORE, store);
     }
 }

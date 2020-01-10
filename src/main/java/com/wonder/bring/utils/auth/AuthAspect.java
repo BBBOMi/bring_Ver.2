@@ -2,7 +2,7 @@ package com.wonder.bring.utils.auth;
 
 import com.wonder.bring.dto.User;
 import com.wonder.bring.mapper.UserMapper;
-import com.wonder.bring.model.DefaultRes;
+import com.wonder.bring.model.DefaultResponse;
 import com.wonder.bring.service.impl.JwtServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -18,13 +18,13 @@ import javax.servlet.http.HttpServletRequest;
 @Aspect
 public class AuthAspect {
 
-    private final static String AUTHORIZATION = "Authorization";
+    public static final String AUTHORIZATION = "Authorization";
 
     /**
      * 실패 시 기본 반환 Response
      */
-    private final static DefaultRes DEFAULT_RES = DefaultRes.builder().status(401).message("인증 실패").build();
-    private final static ResponseEntity<DefaultRes> RES_RESPONSE_ENTITY = new ResponseEntity<>(DEFAULT_RES, HttpStatus.OK);
+    private final static DefaultResponse DEFAULT_RES = DefaultResponse.builder().status(401).message("인증 실패").build();
+    private final static ResponseEntity<DefaultResponse> RES_RESPONSE_ENTITY = new ResponseEntity<>(DEFAULT_RES, HttpStatus.OK);
     private final HttpServletRequest httpServletRequest;
 
     private final UserMapper userMapper;

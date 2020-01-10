@@ -5,9 +5,10 @@ import com.wonder.bring.dto.OrderDetail;
 import com.wonder.bring.dto.OrderDetailInfo;
 import com.wonder.bring.dto.OrderInfo;
 import com.wonder.bring.mapper.OrderMapper;
-import com.wonder.bring.model.DefaultRes;
+import com.wonder.bring.mapper.UserMapper;
+import com.wonder.bring.model.DefaultResponse;
 import com.wonder.bring.model.OrderMenu;
-import com.wonder.bring.model.OrderReq;
+import com.wonder.bring.model.OrderRequest;
 import com.wonder.bring.service.FcmService;
 import com.wonder.bring.service.OrderService;
 import com.wonder.bring.utils.Message;
@@ -24,10 +25,12 @@ import java.util.List;
 public class  OrderServiceImpl implements OrderService {
     private final OrderMapper orderMapper;
     private final FcmService fcmService;
+    private final UserMapper userMapper;
 
-    public OrderServiceImpl(final OrderMapper orderMapper, final FcmService fcmService) {
+    public OrderServiceImpl(final OrderMapper orderMapper, final FcmService fcmService, final UserMapper userMapper) {
         this.orderMapper = orderMapper;
         this.fcmService = fcmService;
+        this.userMapper = userMapper;
     }
 
     /**
@@ -35,47 +38,50 @@ public class  OrderServiceImpl implements OrderService {
      */
     @Transactional
     @Override
-    public DefaultRes createOrder(final int userIdx, final OrderReq orderReq) {
-        if (!orderReq.checkEmpty()) {
+    public DefaultResponse createOrder(final int userIdx, final OrderRequest orderRequest) {
+        if (!orderRequest.checkEmpty()) {
             try {
-                orderMapper.createOrderLIst(orderReq, userIdx);
+                orderMapper.saveOrderList(orderRequest, userIdx);
 
-                int orderIdx = orderReq.getOrderIdx();
+                int orderIdx = orderRequest.getOrderIdx();
 
-                for (OrderMenu orderMenu : orderReq.getOrderMenuList()) {
-                    orderMapper.createOrderMenu(orderIdx, orderMenu);
+                for (OrderMenu orderMenu : orderRequest.getOrderMenuList()) {
+                    orderMapper.saveOrderMenu(orderIdx, orderMenu);
                 }
             } catch (Exception e) {
                 log.info(e.getMessage());
                 TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
 
-                return DefaultRes.res(Status.DB_ERROR, Message.DB_ERROR);
+                return DefaultResponse.res(Status.DB_ERROR, Message.DB_ERROR);
             }
 
-            String fcmToken = orderMapper.getOwnerToken(orderReq.getStoreIdx());
-            String title = "주문 " + orderReq.getOrderIdx();
-            String message = orderMapper.findOrderNick(userIdx) + " 님이 주문 접수를 요청하셨습니다.";
+            String fcmToken = orderMapper.findOwnerTokenByStoreIdx(orderRequest.getStoreIdx());
+            String title = "주문 " + orderRequest.getOrderIdx();
+            String message = orderMapper.findAll(userIdx) + " 님이 주문 접수를 요청하셨습니다.";
             //주문번호로 fcmToken값을 찾아 전송
             fcmService.sendPush(fcmToken, title, message);
 
-            return DefaultRes.res(Status.CREATED, Message.CREATE_ORDER_SUCCESS);
+            return DefaultResponse.res(Status.CREATED, Message.CREATE_ORDER_SUCCESS);
         }
-        return DefaultRes.res(Status.BAD_REQUEST, Message.FAIL_CREATE_ORDER);
+        return DefaultResponse.res(Status.BAD_REQUEST, Message.FAIL_CREATE_ORDER);
     }
 
     /**
      * 주문내역 전체조회
      */
     @Override
-    public DefaultRes<Order> getOrderList(final int userIdx) {
+    public DefaultResponse<Order> getOrderList(final int userIdx) {
+        String nick = userMapper.findNickByUserIdx(userIdx);
+        List<OrderInfo> orderList = orderMapper.findAll(userIdx);
 
-        String nick = orderMapper.findOrderNick(userIdx);
-        List<OrderInfo> orderList = orderMapper.findOrderAll(userIdx);
-        final Order order = new Order(nick, orderList);
         if(orderList.isEmpty())
-            return DefaultRes.res(Status.NO_CONTENT, "주문내역이 존재하지 않습니다");
+            return DefaultResponse.res(Status.NO_CONTENT, "주문내역이 존재하지 않습니다");
 
-        return DefaultRes.res(Status.OK, "주문내역 조회 성공", order);
+        Order order = new Order();
+        order.setNick(nick);
+        order.setOrderList(orderList);
+
+        return DefaultResponse.res(Status.OK, "주문내역 조회 성공", order);
     }
 
 
@@ -83,15 +89,18 @@ public class  OrderServiceImpl implements OrderService {
      * 주문내역 상세조회
      */
     @Override
-    public DefaultRes<OrderDetail> getOrderDetailList(final int orderIdx) {
-        String store = orderMapper.findStoreByOrderIdx(orderIdx);
-        if(store == null) {
-            return DefaultRes.res(Status.NOT_FOUND, Message.NOT_FOUND_ORDER_LIST);
+    public DefaultResponse<OrderDetail> getOrderDetailList(final int orderIdx) {
+        String storeName = orderMapper.findStoreNameByOrderIdx(orderIdx);
+        if(storeName.isEmpty()) {
+            return DefaultResponse.res(Status.NOT_FOUND, Message.NOT_FOUND_ORDER_LIST);
         }
 
-        List<OrderDetailInfo> orderDetailList = orderMapper.findOrderByOrderIdx(orderIdx);
+        List<OrderDetailInfo> orderDetailInfos = orderMapper.findOrderDetailInfoByOrderIdx(orderIdx);
 
-        final OrderDetail orderDetail = new OrderDetail(store, orderDetailList);
-        return DefaultRes.res(Status.OK, "주문 상세내역 조회 성공", orderDetail);
+        OrderDetail orderDetail = new OrderDetail();
+        orderDetail.setStoreName(storeName);
+        orderDetail.setOrderDetailInfos(orderDetailInfos);
+
+        return DefaultResponse.res(Status.OK, "주문 상세내역 조회 성공", orderDetail);
     }
 }

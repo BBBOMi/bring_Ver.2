@@ -2,8 +2,8 @@ package com.wonder.bring.service.impl;
 
 import com.wonder.bring.dto.User;
 import com.wonder.bring.mapper.UserMapper;
-import com.wonder.bring.model.DefaultRes;
-import com.wonder.bring.model.SignUpReq;
+import com.wonder.bring.model.DefaultResponse;
+import com.wonder.bring.model.SignUpRequest;
 import com.wonder.bring.service.S3FileUploadService;
 import com.wonder.bring.service.UserService;
 import com.wonder.bring.utils.Message;
@@ -46,57 +46,58 @@ public class UserServiceImpl implements UserService {
      * @return 결과 데이터
      */
     @Override
-    public DefaultRes getUser(final int userIdx) {
+    public DefaultResponse getUser(final int userIdx) {
         final User user = userMapper.findByUserIdx(userIdx);
         if(user != null) {
-            return DefaultRes.res(Status.OK, Message.FIND_USER_SUCCESS, user);
+            return DefaultResponse.res(Status.OK, Message.FIND_USER_SUCCESS, user);
         } else {
-            return DefaultRes.res(Status.NOT_FOUND, Message.FIND_USER_FAIL);
+            return DefaultResponse.res(Status.NOT_FOUND, Message.FIND_USER_FAIL);
         }
     }
 
     /**
      * 회원 가입
-     * @param signUpReq
+     * @param signUpRequest
      *      가입할 회원 데이터
      * @return 결과 데이터
      */
     @Transactional
     @Override
-    public DefaultRes saveUser(final SignUpReq signUpReq) {
+    public DefaultResponse createUser(SignUpRequest signUpRequest) {
         try {
             // 빈칸 검사
-            if(signUpReq.getId().isEmpty() || signUpReq.getPassword().isEmpty() || signUpReq.getNick().isEmpty()) {
-                return DefaultRes.res(Status.BAD_REQUEST, Message.SIGN_UP_FAIL);
+            if(signUpRequest.getId().isEmpty() || signUpRequest.getPassword().isEmpty() || signUpRequest.getNick().isEmpty()) {
+                return DefaultResponse.res(Status.BAD_REQUEST, Message.SIGN_UP_FAIL);
             }
 
             // 가입 전 id, nick 중복 검사
-            if(dupleCheckId(Optional.ofNullable(signUpReq.getId())).getStatus() != 200) {
-                return DefaultRes.res(Status.BAD_REQUEST, Message.ID_DUPLICATION);
-            } else if(dupleCheckNick(Optional.ofNullable(signUpReq.getNick())).getStatus() != 200) {
-                return DefaultRes.res(Status.BAD_REQUEST, Message.NICK_DUPLICATION);
+            if(repetitionCheckId(Optional.ofNullable(signUpRequest.getId())).getStatus() != 200) {
+                return DefaultResponse.res(Status.BAD_REQUEST, Message.ID_DUPLICATION);
+            }
+            if(repetitionCheckNick(Optional.ofNullable(signUpRequest.getNick())).getStatus() != 200) {
+                return DefaultResponse.res(Status.BAD_REQUEST, Message.NICK_DUPLICATION);
             }
 
             // 중복되지 않았다면 저장
 
             //패스워드 인코딩
 
-            String rawPassword =  signUpReq.getPassword();
+            String rawPassword =  signUpRequest.getPassword();
             String encodedPassword = encrypt(rawPassword);
-            signUpReq.setPassword(encodedPassword);
+            signUpRequest.setPassword(encodedPassword);
 
-            userMapper.save(signUpReq);
-            int idx = userMapper.findByUserId(signUpReq.getId());
+            userMapper.save(signUpRequest);
             // 프로필 사진이 있을 경우
-            if(signUpReq.getProfile() != null) {
-                String url = s3FileUploadService.upload(signUpReq.getProfile());
+            if(signUpRequest.getProfile() != null) {
+                String url = s3FileUploadService.upload(signUpRequest.getProfile());
+                int idx = userMapper.findByUserId(signUpRequest.getId());
                 userMapper.savePhoto(url, idx);
             }
-            return DefaultRes.res(Status.CREATED, Message.SIGN_UP_SUCCESS);
+            return DefaultResponse.res(Status.CREATED, Message.SIGN_UP_SUCCESS);
         } catch(Exception e) {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             log.error(e.getMessage());
-            return DefaultRes.res(Status.DB_ERROR, Message.DB_ERROR);
+            return DefaultResponse.res(Status.DB_ERROR, Message.DB_ERROR);
         }
     }
 
@@ -107,18 +108,17 @@ public class UserServiceImpl implements UserService {
      * @return 결과 데이터
      */
     @Override
-    public DefaultRes dupleCheckId(final Optional<String> id) {
+    public DefaultResponse repetitionCheckId(final Optional<String> id) {
         // id가 null이 아니고 ""이 아닐 때,
         if(id.isPresent() && !id.get().equals("")) {
-            int check = userMapper.checkId(id.get());
             // 이미 존재하는 id일 경우
-            if(check > 0) {
-                return DefaultRes.res(Status.BAD_REQUEST, Message.ID_DUPLICATION);
+            if(isRepetition(userMapper.checkId(id.get()))) {
+                return DefaultResponse.res(Status.BAD_REQUEST, Message.ID_DUPLICATION);
             }
-            return DefaultRes.res(Status.OK, Message.CHECK_SUCCESS);
+            return DefaultResponse.res(Status.OK, Message.CHECK_SUCCESS);
         }
         // id가 null이거나 ""일 경우
-        return DefaultRes.res(Status.BAD_REQUEST, Message.NO_CONTENT);
+        return DefaultResponse.res(Status.BAD_REQUEST, Message.NO_CONTENT);
     }
 
     /**
@@ -128,17 +128,20 @@ public class UserServiceImpl implements UserService {
      * @return 결과 데이터
      */
     @Override
-    public DefaultRes dupleCheckNick(final Optional<String> nick) {
+    public DefaultResponse repetitionCheckNick(final Optional<String> nick) {
         // nick의 값이 null이 아니고 ""이 아닐 때,
         if(nick.isPresent() && !nick.get().equals("")) {
-            int check = userMapper.checkNick(nick.get());
             // 이미 존재하는 nick일 경우
-            if(check > 0) {
-                return DefaultRes.res(Status.BAD_REQUEST, Message.NICK_DUPLICATION);
+            if(isRepetition(userMapper.checkNick(nick.get()))) {
+                return DefaultResponse.res(Status.BAD_REQUEST, Message.NICK_DUPLICATION);
             }
-            return DefaultRes.res(Status.OK, Message.CHECK_SUCCESS);
+            return DefaultResponse.res(Status.OK, Message.CHECK_SUCCESS);
         }
         // nick이 null이거나 ""이면
-        return DefaultRes.res(Status.BAD_REQUEST, Message.NO_CONTENT);
+        return DefaultResponse.res(Status.BAD_REQUEST, Message.NO_CONTENT);
+    }
+
+    private boolean isRepetition(int count) {
+        return count > 0;
     }
 }

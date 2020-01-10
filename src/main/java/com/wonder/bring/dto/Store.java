@@ -1,11 +1,13 @@
 package com.wonder.bring.dto;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 public class Store {
     // 운영시간
-    private String time;
+    private String openingHours;
     // 휴무일
     private String breakDays;
     // 전화번호

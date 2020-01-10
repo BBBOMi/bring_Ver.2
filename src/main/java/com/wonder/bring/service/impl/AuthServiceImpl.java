@@ -2,9 +2,10 @@ package com.wonder.bring.service.impl;
 
 import com.wonder.bring.dto.User;
 import com.wonder.bring.mapper.UserMapper;
-import com.wonder.bring.model.DefaultRes;
-import com.wonder.bring.model.LoginReq;
+import com.wonder.bring.model.DefaultResponse;
+import com.wonder.bring.model.LoginRequest;
 import com.wonder.bring.service.AuthService;
+import com.wonder.bring.service.JwtService;
 import com.wonder.bring.utils.Message;
 import com.wonder.bring.utils.Status;
 import org.springframework.stereotype.Service;
@@ -15,34 +16,34 @@ import static com.wonder.bring.utils.Encryption.encrypt;
 public class AuthServiceImpl implements AuthService {
 
     private final UserMapper userMapper;
-    private final JwtServiceImpl jwtServiceImpl;
+    private final JwtService jwtService;
 
-    public AuthServiceImpl(final UserMapper userMapper, final JwtServiceImpl jwtServiceImpl) {
+    public AuthServiceImpl(final UserMapper userMapper, final JwtService jwtService) {
         this.userMapper = userMapper;
-        this.jwtServiceImpl = jwtServiceImpl;
+        this.jwtService = jwtService;
     }
 
     @Override
-    public DefaultRes<JwtServiceImpl.TokenRes> login(final LoginReq loginReq) {
-        final User user = userMapper.findByIdAndPassword(loginReq.getId(),
-                encrypt(loginReq.getPassword()));
+    public DefaultResponse<JwtServiceImpl.TokenResponse> login(final LoginRequest loginRequest) {
+        final User user = userMapper.findByIdAndPassword(loginRequest.getId(),
+                encrypt(loginRequest.getPassword()));
 
         if (user != null) {
             //토큰 생성
-            final JwtServiceImpl.TokenRes tokenDto = new JwtServiceImpl.TokenRes(jwtServiceImpl.create(user.getUserIdx()));
+            final JwtServiceImpl.TokenResponse token = new JwtServiceImpl.TokenResponse(jwtService.create(user.getUserIdx()));
 
             //user의 fcmToken값 저장
-            int userIdx = userMapper.findByUserId(loginReq.getId());
-            userMapper.saveFcmToken(loginReq.getFcmToken(), userIdx);
+            int userIdx = userMapper.findByUserId(loginRequest.getId());
+            userMapper.saveFcmToken(loginRequest.getFcmToken(), userIdx);
 
-            return DefaultRes.res(Status.OK, Message.LOGIN_SUCCESS, tokenDto);
+            return DefaultResponse.res(Status.OK, Message.LOGIN_SUCCESS, token);
         }
-        return DefaultRes.res(Status.BAD_REQUEST, Message.LOGIN_FAIL);
+        return DefaultResponse.res(Status.BAD_REQUEST, Message.LOGIN_FAIL);
     }
 
     @Override
-    public DefaultRes<Boolean> checkToken() {
-        return DefaultRes.res(Status.OK, "유효한 토큰입니다");
+    public DefaultResponse<Boolean> checkToken() {
+        return DefaultResponse.res(Status.OK, "유효한 토큰입니다");
     }
 
 }

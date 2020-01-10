@@ -1,11 +1,13 @@
 package com.wonder.bring.dto;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 public class OrderInfo {
     private int orderIdx;
-    private String name; //매장이름
+    private String storeName; //매장이름
     private int state;
     private String time;
 }

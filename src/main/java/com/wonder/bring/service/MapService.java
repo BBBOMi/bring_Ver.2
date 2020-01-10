@@ -1,6 +1,6 @@
 package com.wonder.bring.service;
 
-import com.wonder.bring.model.DefaultRes;
+import com.wonder.bring.model.DefaultResponse;
 
 import java.util.Optional;
 
@@ -9,6 +9,6 @@ import java.util.Optional;
  */
 
 public interface MapService {
-    DefaultRes getStores(final Optional<Double> la, final Optional<Double> lo); // 위도, 경도 받아오기
-    DefaultRes getStoreInfo(final int storeIdx);
+    DefaultResponse getStores(final Optional<Double> latitude, final Optional<Double> longitude); // 위도, 경도 받아오기
+    DefaultResponse getStoreInfo(final int storeIdx);
 }

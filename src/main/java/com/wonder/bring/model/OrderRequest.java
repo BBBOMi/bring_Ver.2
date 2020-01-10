@@ -5,7 +5,7 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class OrderReq {
+public class OrderRequest {
     private int orderIdx;
     private int storeIdx; //주문한 매장인덱스
     private List<OrderMenu> orderMenuList; //주문한 메뉴리스트

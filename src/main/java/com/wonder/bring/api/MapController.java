@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
 
-import static com.wonder.bring.model.DefaultRes.BAD_REQUEST_RES;
-import static com.wonder.bring.model.DefaultRes.FAIL_DEFAULT_RES;
+import static com.wonder.bring.model.DefaultResponse.BAD_REQUEST_RESPONSE;
+import static com.wonder.bring.model.DefaultResponse.FAIL_DEFAULT_RESPONSE;
 
 /**
  * Created by bomi on 2019-01-02.
@@ -40,11 +40,11 @@ public class MapController {
             if(latitude.isPresent() && longitude.isPresent()) {
                 return new ResponseEntity(mapService.getStores(latitude, longitude), HttpStatus.OK);
             } else {
-                return new ResponseEntity(BAD_REQUEST_RES, HttpStatus.OK);
+                return new ResponseEntity(BAD_REQUEST_RESPONSE, HttpStatus.OK);
             }
         } catch(Exception e) {
             log.error(e.getMessage());
-            return new ResponseEntity(FAIL_DEFAULT_RES, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity(FAIL_DEFAULT_RESPONSE, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -60,7 +60,7 @@ public class MapController {
             return new ResponseEntity(mapService.getStoreInfo(storeIdx), HttpStatus.OK);
         } catch(Exception e) {
             log.error(e.getMessage());
-            return new ResponseEntity(FAIL_DEFAULT_RES, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity(FAIL_DEFAULT_RESPONSE, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 

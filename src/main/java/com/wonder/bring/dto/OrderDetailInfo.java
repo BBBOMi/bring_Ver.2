@@ -1,11 +1,13 @@
 package com.wonder.bring.dto;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 public class OrderDetailInfo {
     //메뉴 이름
-    private String name;
+    private String menuName;
     //사이즈
     private int size;
     //수량

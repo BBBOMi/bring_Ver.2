@@ -24,7 +24,7 @@ public interface MenuMapper {
             "INNER JOIN STORES_MENU ON (MENU.menu_idx = STORES_MENU.menu_idx) " +
             "INNER JOIN SIZE_PRICE ON (MENU.menu_idx = SIZE_PRICE.menu_idx) " +
             "WHERE STORES_MENU.store_idx = #{store_idx} AND (SIZE_PRICE.size NOT IN(0, 2)) ORDER BY SIZE_PRICE.size")
-    List<Menu> findMenuByStoreIdx(@Param("store_idx") final int storeIdx);
+    List<Menu> findMenusByStoreIdx(@Param("store_idx") final int storeIdx);
 
     /**
      * 메뉴 상세 정보 조회
@@ -32,9 +32,9 @@ public interface MenuMapper {
      */
     // menu 정보 조회
     @Select("SELECT COUNT(*) FROM STORES_MENU WHERE store_idx = #{store_idx} AND menu_idx = #{menu_idx}")
-    int findStoreMenu(@Param("store_idx") final int storeIdx, @Param("menu_idx") final int menuIdx);
+    int getMenuCount(@Param("store_idx") final int storeIdx, @Param("menu_idx") final int menuIdx);
 
     // size별 가격 조회
     @Select("SELECT size, price FROM SIZE_PRICE WHERE menu_idx = #{menu_idx} ORDER BY size")
-    List<SizePrice> findSizePriceByMenuIdx(@Param("menu_idx") final int menuIdx);
+    List<SizePrice> findSizePricesByMenuIdx(@Param("menu_idx") final int menuIdx);
 }

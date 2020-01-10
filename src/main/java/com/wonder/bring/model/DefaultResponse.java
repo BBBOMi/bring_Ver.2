@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Data
 @Builder
 @AllArgsConstructor
-public class DefaultRes<T> {
+public class DefaultResponse<T> {
 
     private int status;
 
@@ -19,24 +19,24 @@ public class DefaultRes<T> {
 
     private T data;
 
-    public DefaultRes(final int status, final String message) {
+    public DefaultResponse(final int status, final String message) {
         this.status = status;
         this.message = message;
         this.data = null;
     }
 
-    public static<T> DefaultRes<T> res(final int status, final String message) {
+    public static<T> DefaultResponse<T> res(final int status, final String message) {
         return res(status, message, null);
     }
 
-    public static<T> DefaultRes<T> res(final int status, final String message, final T t) {
-        return DefaultRes.<T>builder()
+    public static<T> DefaultResponse<T> res(final int status, final String message, final T t) {
+        return DefaultResponse.<T>builder()
                 .data(t)
                 .status(status)
                 .message(message)
                 .build();
     }
 
-    public static final DefaultRes FAIL_DEFAULT_RES = new DefaultRes(Status.INTERNAL_SERVER_ERROR, Message.INTERNAL_SERVER_ERROR);
-    public static final DefaultRes BAD_REQUEST_RES = new DefaultRes(Status.BAD_REQUEST, Message.NOT_GET_MY_POINT);
+    public static final DefaultResponse FAIL_DEFAULT_RESPONSE = new DefaultResponse(Status.INTERNAL_SERVER_ERROR, Message.INTERNAL_SERVER_ERROR);
+    public static final DefaultResponse BAD_REQUEST_RESPONSE = new DefaultResponse(Status.BAD_REQUEST, Message.NOT_GET_MY_POINT);
 }
