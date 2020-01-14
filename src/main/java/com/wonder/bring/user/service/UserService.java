@@ -1,7 +1,7 @@
 package com.wonder.bring.user.service;
 
-import com.wonder.bring.common.dto.DefaultRes;
-import com.wonder.bring.user.api.dto.SignUpReq;
+import com.wonder.bring.common.dto.DefaultResponse;
+import com.wonder.bring.user.api.dto.SignUpRequest;
 
 import java.util.Optional;
 
@@ -10,8 +10,8 @@ import java.util.Optional;
  */
 
 public interface UserService {
-    DefaultRes saveUser(final SignUpReq signUpReq);
-    DefaultRes dupleCheckId(final Optional<String> id);
-    DefaultRes dupleCheckNick(final Optional<String> nick);
-    DefaultRes getUser(final int userIdx);
+    DefaultResponse createUser(final SignUpRequest signUpRequest);
+    DefaultResponse repetitionCheckId(final Optional<String> id);
+    DefaultResponse repetitionCheckNick(final Optional<String> nick);
+    DefaultResponse getUser(final int userIdx);
 }

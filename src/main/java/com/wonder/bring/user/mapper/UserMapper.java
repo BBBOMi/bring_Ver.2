@@ -1,7 +1,7 @@
 package com.wonder.bring.user.mapper;
 
 import com.wonder.bring.user.api.dto.User;
-import com.wonder.bring.user.api.dto.SignUpReq;
+import com.wonder.bring.user.api.dto.SignUpRequest;
 import org.apache.ibatis.annotations.*;
 
 @Mapper
@@ -23,9 +23,9 @@ public interface UserMapper {
     void saveFcmToken(@Param("fcmToken") final String fcmToken, @Param("userIdx") final int userIdx);
 
     // 회원 가입
-    @Insert("INSERT INTO USERS(id, passwd, nick) VALUES(#{signUpReq.id}, #{signUpReq.password}, #{signUpReq.nick})")
+    @Insert("INSERT INTO USERS(id, passwd, nick) VALUES(#{signUpRequest.id}, #{signUpRequest.password}, #{signUpRequest.nick})")
     @Options(useGeneratedKeys = true, keyColumn = "USERS.user_idx")
-    void save(@Param("signUpReq") final SignUpReq signUpReq);
+    void save(@Param("signUpRequest") final SignUpRequest signUpRequest);
 
     // 프로필 사진 업로드
     @Update("UPDATE USERS SET profile_url = #{profileUrl} WHERE user_idx = #{userIdx}")
@@ -38,5 +38,8 @@ public interface UserMapper {
     // 닉네임 중복 검사
     @Select("SELECT COUNT(*) FROM USERS WHERE nick = #{nick}")
     int checkNick(@Param("nick") final String nick);
+
+    @Select("SELECT nick FROM USERS WHERE user_idx = #{userIdx}")
+    String findNickByUserIdx(@Param("userIdx") final int userIdx);
 }
 

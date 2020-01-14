@@ -1,8 +1,10 @@
 package com.wonder.bring.menu.api.dto;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 public class Menu {
     // 메뉴 고유 번호
     private int menuIdx;

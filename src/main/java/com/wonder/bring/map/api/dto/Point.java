@@ -1,12 +1,14 @@
 package com.wonder.bring.map.api.dto;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Created by bomi on 2019-01-02.
  */
 
-@Data
+@Getter
+@Setter
 public class Point {
     private int storeIdx; // 매장 idx
     private String storeName; // 매장 이름

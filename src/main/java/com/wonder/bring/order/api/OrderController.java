@@ -1,14 +1,16 @@
 package com.wonder.bring.order.api;
 
-import com.wonder.bring.order.api.dto.OrderReq;
 import com.wonder.bring.config.security.jwt.JwtService;
+import com.wonder.bring.order.api.dto.OrderRequest;
 import com.wonder.bring.order.service.OrderService;
 import com.wonder.bring.config.security.auth.Auth;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import static com.wonder.bring.common.dto.DefaultRes.FAIL_DEFAULT_RES;
+
+import static com.wonder.bring.common.dto.DefaultResponse.FAIL_DEFAULT_RESPONSE;
+import static com.wonder.bring.config.security.auth.AuthAspect.AUTHORIZATION;
 
 @Slf4j
 @RequestMapping("orders")
@@ -24,25 +26,25 @@ public class OrderController {
 
     //주문 생성하기
     @Auth
-    @PostMapping()
-    public ResponseEntity createOrder(@RequestHeader("Authorization") final String header, @RequestBody OrderReq orderReq) {
+    @PostMapping("")
+    public ResponseEntity createOrder(@RequestHeader(AUTHORIZATION) final String header, @RequestBody OrderRequest orderRequest) {
         try {
-            int userIdx = jwtService.decode(header).getUser_idx();
-            return new ResponseEntity<>(orderService.createOrder(userIdx, orderReq), HttpStatus.OK);
+            int userIdx = jwtService.decode(header).getUserIdx();
+            return new ResponseEntity<>(orderService.createOrder(userIdx, orderRequest), HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<>(FAIL_DEFAULT_RES, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(FAIL_DEFAULT_RESPONSE, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     //개인의 전체 주문내역 조회
     @Auth
-    @GetMapping()
-    public ResponseEntity getOrderList(@RequestHeader("Authorization") final String header) {
+    @GetMapping("")
+    public ResponseEntity getOrderList(@RequestHeader(AUTHORIZATION) final String header) {
         try {
-            int userIdx = jwtService.decode(header).getUser_idx();
+            int userIdx = jwtService.decode(header).getUserIdx();
             return new ResponseEntity<>(orderService.getOrderList(userIdx), HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<>(FAIL_DEFAULT_RES, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(FAIL_DEFAULT_RESPONSE, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -54,7 +56,7 @@ public class OrderController {
         try {
             return new ResponseEntity<>(orderService.getOrderDetailList(orderIdx), HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<>(FAIL_DEFAULT_RES, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(FAIL_DEFAULT_RESPONSE, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 

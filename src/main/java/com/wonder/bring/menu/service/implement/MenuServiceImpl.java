@@ -5,7 +5,7 @@ import com.wonder.bring.menu.api.dto.SizePrice;
 import com.wonder.bring.store.api.dto.StoreMenu;
 import com.wonder.bring.menu.mapper.MenuMapper;
 import com.wonder.bring.store.mapper.StoreMapper;
-import com.wonder.bring.common.dto.DefaultRes;
+import com.wonder.bring.common.dto.DefaultResponse;
 import com.wonder.bring.menu.service.MenuService;
 import com.wonder.bring.common.utils.Message;
 import com.wonder.bring.common.utils.Status;
@@ -34,20 +34,20 @@ public class MenuServiceImpl implements MenuService {
      * @return 메뉴 리스트
      */
     @Override
-    public DefaultRes<StoreMenu> findMenuByStoreIdx(int storeIdx) {
+    public DefaultResponse<StoreMenu> findMenuByStoreIdx(int storeIdx) {
         // storeIdx로 메뉴 리스트 조회
         final StoreMenu storeMenu = storeMapper.findStoreByStoreIdx(storeIdx);
-        List<Menu> menuList = menuMapper.findMenuByStoreIdx(storeIdx);
+        List<Menu> menuList = menuMapper.findMenusByStoreIdx(storeIdx);
 
         // 해당 매장이 없을 때
         if(storeMenu == null) {
-            return DefaultRes.res(Status.NOT_FOUND, Message.NOT_FOUND_STORE);
+            return DefaultResponse.of(Status.NOT_FOUND, Message.NOT_FOUND_STORE);
         } else if(menuList.isEmpty()) {
-            return DefaultRes.res(Status.NOT_FOUND, Message.NOT_FOUND_LIST_MENU);
+            return DefaultResponse.of(Status.NOT_FOUND, Message.NOT_FOUND_LIST_MENU);
         } else {
-            storeMenu.setMenuList(menuList);
+            storeMenu.setMenus(menuList);
         }
-        return DefaultRes.res(Status.OK, Message.FIND_LIST_MENU, storeMenu);
+        return DefaultResponse.of(Status.OK, Message.FIND_LIST_MENU, storeMenu);
     }
 
     /**
@@ -57,23 +57,23 @@ public class MenuServiceImpl implements MenuService {
      * @return 메뉴 상세 정보
      */
     @Override
-    public DefaultRes findDetailMenu(int storeIdx, int menuIdx) {
-        int count  = menuMapper.findStoreMenu(storeIdx, menuIdx);
+    public DefaultResponse findDetailMenu(int storeIdx, int menuIdx) {
+        int count  = menuMapper.getMenuCount(storeIdx, menuIdx);
 
         // 해당 매장에 메뉴가 없거나
         // 매장이 없거나
         // 메뉴가 없을 경우
         if(count == 0) {
-            return DefaultRes.res(Status.NOT_FOUND, Message.NOT_FOUND_MENU_DETAIL);
+            return DefaultResponse.of(Status.NOT_FOUND, Message.NOT_FOUND_MENU_DETAIL);
         }
         // 메뉴 사이즈-가격 조회
-        final List<SizePrice> sizePrices = menuMapper.findSizePriceByMenuIdx(menuIdx);
+        final List<SizePrice> sizePrices = menuMapper.findSizePricesByMenuIdx(menuIdx);
 
         // 메뉴 정보가 없을 때
         if(sizePrices.isEmpty()) {
-            return DefaultRes.res(Status.NOT_FOUND, Message.NOT_FOUND_SIZE_PRICE);
+            return DefaultResponse.of(Status.NOT_FOUND, Message.NOT_FOUND_SIZE_PRICE);
         } else {
-            return DefaultRes.res(Status.OK, Message.FIND_MENU_DETAIL, sizePrices);
+            return DefaultResponse.of(Status.OK, Message.FIND_MENU_DETAIL, sizePrices);
         }
     }
 }

@@ -8,7 +8,7 @@ import org.springframework.web.multipart.MultipartFile;
  */
 
 @Data
-public class SignUpReq {
+public class SignUpRequest {
     private String id; // id
     private String password; // password
     private String nick; // nickname

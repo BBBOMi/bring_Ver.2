@@ -24,11 +24,11 @@ public class JwtServiceImpl implements JwtService {
     private String SECRET;
 
     @Override
-    public String create(final int user_idx) {
+    public String create(final int userIdx) {
         try {
             JWTCreator.Builder b = JWT.create();
             b.withIssuer(ISSUER);
-            b.withClaim("user_idx", user_idx);
+            b.withClaim("userIdx", userIdx);
             return b.sign(Algorithm.HMAC256(SECRET));
         } catch (JWTCreationException JwtCreationException) {
             log.info(JwtCreationException.getMessage());
@@ -41,7 +41,7 @@ public class JwtServiceImpl implements JwtService {
         try {
             final JWTVerifier jwtVerifier = require(Algorithm.HMAC256(SECRET)).withIssuer(ISSUER).build();
             DecodedJWT decodedJWT = jwtVerifier.verify(token);
-            return new Token(decodedJWT.getClaim("user_idx").asLong().intValue());
+            return new Token(decodedJWT.getClaim("userIdx").asLong().intValue());
         } catch (JWTVerificationException jve) {
             log.error(jve.getMessage());
         } catch (Exception e) {
@@ -52,35 +52,35 @@ public class JwtServiceImpl implements JwtService {
 
     @Override
     public boolean checkAuth(final String header, final int userIdx) {
-        return decode(header).getUser_idx() == userIdx;
+        return decode(header).getUserIdx() == userIdx;
     }
 
     public static class Token {
         //토큰에 담길 정보 필드
         //초기값을 -1로 설정함으로써 로그인 실패시 -1반환
-        private int user_idx = -1;
+        private int userIdx = -1;
 
         public Token() {
         }
 
-        public Token(final int user_idx) {
-            this.user_idx = user_idx;
+        public Token(final int userIdx) {
+            this.userIdx = userIdx;
         }
 
-        public int getUser_idx() {
-            return user_idx;
+        public int getUserIdx() {
+            return userIdx;
         }
     }
 
-    //반환될 토큰Res
-    public static class TokenRes {
+    //반환될 토큰Response
+    public static class TokenResponse {
         //실제 토큰
         private String token;
 
-        public TokenRes() {
+        public TokenResponse() {
         }
 
-        public TokenRes(final String token) {
+        public TokenResponse(final String token) {
             this.token = token;
         }
 

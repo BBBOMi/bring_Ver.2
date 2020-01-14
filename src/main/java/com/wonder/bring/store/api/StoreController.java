@@ -1,7 +1,7 @@
 package com.wonder.bring.store.api;
 
 import com.wonder.bring.store.api.dto.Store;
-import com.wonder.bring.common.dto.DefaultRes;
+import com.wonder.bring.common.dto.DefaultResponse;
 import com.wonder.bring.store.service.StoreService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
-import static com.wonder.bring.common.dto.DefaultRes.FAIL_DEFAULT_RES;
+import static com.wonder.bring.common.dto.DefaultResponse.FAIL_DEFAULT_RESPONSE;
 
 /**
  * Create by YoungEun on 2018-12-29.
@@ -22,7 +22,7 @@ public class StoreController {
 
     private final StoreService storeService;
 
-    public StoreController(StoreService storeService) {
+    public StoreController(final StoreService storeService) {
         this.storeService = storeService;
     }
 
@@ -35,12 +35,12 @@ public class StoreController {
     @GetMapping("/stores/{storeIdx}")
     public ResponseEntity getStore(@PathVariable(value = "storeIdx") final int storeIdx) {
         try {
-            DefaultRes<Store> defaultRes = storeService.findByStoreIdx(storeIdx);
+            DefaultResponse<Store> defaultResponse = storeService.getStoreInfo(storeIdx);
 
-            return new ResponseEntity<>(defaultRes, HttpStatus.OK);
+            return new ResponseEntity<>(defaultResponse, HttpStatus.OK);
         } catch (Exception e) {
             log.error(e.getMessage());
-            return new ResponseEntity<>(FAIL_DEFAULT_RES, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(FAIL_DEFAULT_RESPONSE, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

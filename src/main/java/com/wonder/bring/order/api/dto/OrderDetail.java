@@ -1,16 +1,13 @@
 package com.wonder.bring.order.api.dto;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 
-@Data
+@Getter
+@Setter
 public class OrderDetail {
-    private String store;
-    private List<OrderDetailInfo> orderDetailList;
-
-    public OrderDetail(final String store, final List<OrderDetailInfo> orderDetailList) {
-        this.store = store;
-        this.orderDetailList = orderDetailList;
-    }
+    private String storeName;
+    private List<OrderDetailInfo> orderDetailInfos;
 }
