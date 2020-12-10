@@ -1,13 +1,12 @@
 package com.wonder.bring.user.service.implement;
 
-import com.wonder.bring.user.api.dto.User;
-import com.wonder.bring.user.mapper.UserMapper;
 import com.wonder.bring.common.dto.DefaultResponse;
-import com.wonder.bring.user.api.dto.SignUpRequest;
-import com.wonder.bring.s3uploader.S3FileUploadService;
-import com.wonder.bring.user.service.UserService;
 import com.wonder.bring.common.utils.Message;
 import com.wonder.bring.common.utils.Status;
+import com.wonder.bring.user.api.dto.SignUpRequest;
+import com.wonder.bring.user.api.dto.User;
+import com.wonder.bring.user.mapper.UserMapper;
+import com.wonder.bring.user.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,16 +25,12 @@ import static com.wonder.bring.config.security.Encryption.encrypt;
 public class UserServiceImpl implements UserService {
 
     private final UserMapper userMapper;
-    // UserService에서 파일 업로드(사진 업로드)를 위해 추가
-    private final S3FileUploadService s3FileUploadService;
 
     /**
      * 생성자 의존성 주입
      * @param userMapper
-     * @param s3FileUploadService
      */
-    public UserServiceImpl(final UserMapper userMapper, final S3FileUploadService s3FileUploadService) {
-        this.s3FileUploadService = s3FileUploadService;
+    public UserServiceImpl(final UserMapper userMapper) {
         this.userMapper = userMapper;
     }
 
@@ -89,9 +84,7 @@ public class UserServiceImpl implements UserService {
             userMapper.save(signUpRequest);
             // 프로필 사진이 있을 경우
             if(signUpRequest.getProfile() != null) {
-                String url = s3FileUploadService.upload(signUpRequest.getProfile());
                 int idx = userMapper.findByUserId(signUpRequest.getId());
-                userMapper.savePhoto(url, idx);
             }
             return DefaultResponse.of(Status.CREATED, Message.SIGN_UP_SUCCESS);
         } catch(Exception e) {
